@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import '../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
-contract CryptoCamodelNameToDescrrs is Ownable {
+contract CryptoCars is Ownable {
 
     struct CarDescription
     {
@@ -11,7 +11,7 @@ contract CryptoCamodelNameToDescrrs is Ownable {
       uint posOwnerArray;
     }
 
-    mapping(string => CarDescription ) public modelNameToDescr;
+    mapping(string => CarDescription ) private modelNameToDescr;
     mapping(address => string[] ) public ownerToCars;
 
     uint constant minInitialPrice = 1 ether;
@@ -48,6 +48,8 @@ contract CryptoCamodelNameToDescrrs is Ownable {
         else {
             // Re-sale
             require(msg.value >= modelNameToDescr[modelName].price * 3 / 2 , "The ether sent was too low for a re-sale");
+            require(msg.sender != modelNameToDescr[modelName].owner , "Trying to re-sell a car to same user");
+            
             eraseForOldOwner(modelNameToDescr[modelName].owner,
                              modelNameToDescr[modelName].posOwnerArray);
         }
@@ -65,7 +67,7 @@ contract CryptoCamodelNameToDescrrs is Ownable {
         return ownerToCars[owner].length;
     }
 
-    function carInfo(string modelName) public view returns(address, uint256 price)
+    function carInfo(string modelName) public view returns(address ownerAddress, uint256 price)
     {
         return (modelNameToDescr[modelName].owner, modelNameToDescr[modelName].price);
     }
