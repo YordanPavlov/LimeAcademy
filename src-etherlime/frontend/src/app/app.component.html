@@ -1,0 +1,55 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12 text-center">
+      <h1>Dancho's CryptoCars</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col no-gutters">
+      <div class="card">
+        <div class=" card-body ">
+          <h5 class="card-title ">Get all cars owned by an address</h5>
+          <div>
+            <input type="text" #addressHash placeholder="0x...">
+            <button class="btn btn-info" (click)="getListCars(addressHash.value)">Get cars</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="listCarsString">
+    <div class="col-12 text-center align-self-center billboard">{{listCarsString}}</div>
+  </div>
+<br>
+
+  <br>
+
+  <div class="row">
+    <div class="col no-gutters">
+      <div class="card">
+        <div class=" card-body ">
+          <h5 class="card-title ">Check how much money have been spent by an address</h5>
+          <div>
+            <input type="text" [(ngModel)]="address" placeholder="0x...">
+            <button class="btn btn-info" (click)="moneySpent()">Check</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col no-gutters">
+      <div class="card">
+        <div class=" card-body ">
+          <h5 class="card-title ">Check car owner and amount paid</h5>
+          <div>
+            <input type="text" [(ngModel)]="address" placeholder="0x...">
+            <button class="btn btn-info" (click)="moneySpent()">Check</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

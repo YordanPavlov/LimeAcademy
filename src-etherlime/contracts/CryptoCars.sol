@@ -15,7 +15,8 @@ contract CryptoCars is Ownable {
     mapping(address => string[] ) public ownerToCars;
     mapping(address => int ) public moneySpent;
 
-    uint constant minInitialPrice = 1 ether;
+    // A millionth of an ether
+    uint constant minInitialPrice = 100000000000 wei;
 
     /**
      * events
