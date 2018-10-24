@@ -17,6 +17,7 @@ describe('CryptoCars', () => {
     }
 
     const ONE_ETHER = ethers.utils.bigNumberify('1000000000000000000');
+    const PROFIT_RE_SELL_FIRST_OWNER = ethers.utils.bigNumberify('-250000000000000000');
     const ONE_AND_A_HALF_ETHER = ethers.utils.bigNumberify('1500000000000000000');
     const TWO_ETHER = ethers.utils.bigNumberify('1000000000000000000');
 
@@ -47,26 +48,6 @@ describe('CryptoCars', () => {
 
     });*/
 
-/*    describe('setPrice', () => {
-
-        it('should update price successfully', async () => {
-            await contract.setPrice(ONE_ETHER);
-            let price = await contract.price();
-            assert(price.eq(ONE_ETHER), 'The price was not updated correctly');
-        });
-
-        it('should throw updating price with invalid value', async () => {
-            assert.revert(contract.setPrice(0));
-        });
-
-        it('should throw if non-authorized user tries to update price', async () => {
-            let _notOwnerWallet = new ethers.Wallet(notOwner.secretKey, provider);
-            let _contract = new ethers.Contract(contract.address, Billboard.abi, _notOwnerWallet);
-            assert.revert(_contract.setPrice(ONE_ETHER));
-        });
-
-    });
-*/
 async function commonEventCheck(tx, modelName, expectedPrice, expectedBuyer) {
   let txReceipt = await provider.getTransactionReceipt(tx.hash);
 
@@ -103,57 +84,44 @@ async function commonEventCheck(tx, modelName, expectedPrice, expectedBuyer) {
         });
 
         it('should re-sell successfully and check event', async () => {
-          let _notOwnerWallet = new ethers.Wallet(notOwner.secretKey, provider);
-          let _contract = new ethers.Contract(contract.address, CryptoCars.abi, _notOwnerWallet);
+          let _newOwnerWallet = new ethers.Wallet(notOwner.secretKey, provider);
+          let _contract = new ethers.Contract(contract.address, CryptoCars.abi, _newOwnerWallet);
 
+          // First do the initial buy through the account of the first owner
+          await contract.buy(modelName, {value: ONE_ETHER});
           let tx = await _contract.buy(modelName, {value: ONE_AND_A_HALF_ETHER });
 
+          let carsOldOwner =  await _contract.getCarsCountOfOwner(owner.wallet.address);
 
-                    let result =  await _contract.ownerToCars(owner.wallet.address, 0);
-                    console.log( result)
+          assert(0 == carsOldOwner);
 
-          let carForOwner = await _contract.ownerToCars(_notOwnerWallet.address, 0);
+          let carForOwner = await _contract.ownerToCars(_newOwnerWallet.address, 0);
           assert.strictEqual(carForOwner, modelName, 'Car not correctly marked as bought for owner. Second hand.');
 
           let registeredCar = await _contract.carInfo(modelName);
-          assert.strictEqual(registeredCar.ownerAddress, _notOwnerWallet.address, 'New car owner not set correctly after re-sell.');
+          assert.strictEqual(registeredCar.ownerAddress, _newOwnerWallet.address, 'New car owner not set correctly after re-sell.');
 
-          //assert ( 0 == contract.ownerToCars(owner.wallet.address).length, 'Old car owner not set correctly after re-sell.');
+          await commonEventCheck(tx, modelName, ONE_AND_A_HALF_ETHER, _newOwnerWallet.address);
 
+          let newOwnerSpent = await _contract.moneySpent(_newOwnerWallet.address);
+          assert(ethers.utils.bigNumberify(newOwnerSpent).eq(ONE_AND_A_HALF_ETHER));
 
-          await commonEventCheck(tx, modelName, ONE_AND_A_HALF_ETHER, _notOwnerWallet.address);
-
-
-/*
-            let txReceipt = await provider.getTransactionReceipt(tx.hash);
-            // check for event
-            let isEmitted = utils.hasEvent(txReceipt, contract, 'LogBillboardBought');
-
-            assert(isEmitted, 'Event LogBillboardBought not emitted');
-
-            // parse logs
-            let logs = utils.parseLogs(txReceipt, contract, 'LogBillboardBought');
-
-            // check log details
-            assert(ethers.utils.bigNumberify(logs.length).eq('1'));
-            assert.strictEqual(logs[0].buyer, owner.wallet.address, "Buyer does not match");
-            assert(ethers.utils.bigNumberify(logs[0].paied).eq(ONE_ETHER), "Paied amount ethers does not match");
-            assert.strictEqual(logs[0].slogan, slogan, "Slogan does not match");
-            */
+          let oldOwnerSpent = await _contract.moneySpent(owner.wallet.address);
+          assert(ethers.utils.bigNumberify(oldOwnerSpent).eq(PROFIT_RE_SELL_FIRST_OWNER));
         });
 
-  /*      it('should throw if transferred ethers are not enough', async () => {
-            assert.revert(contract.buy(slogan, {value: 1000}));
-        });*/
+        it('should throw if transferred ethers are not enough', async () => {
+            assert.revert(contract.buy(modelName, {value: 1000}));
+        });
 
     });
-/*
+
     describe('withdraw', () => {
 
-        let slogan = 'sample slogan';
+        let modelName = 'Sample Name';
 
         it('should withdraw successfully', async () => {
-            await contract.buy(slogan, {value: ONE_ETHER});
+            await contract.buy(modelName, {value: ONE_ETHER});
 
             let _contractBalance = await provider.getBalance(contract.address);
             assert(_contractBalance.eq(ONE_ETHER), 'Contract balance does not match before withdraw');
@@ -165,7 +133,7 @@ async function commonEventCheck(tx, modelName, expectedPrice, expectedBuyer) {
         });
 
         it('should withdraw successfully and check event', async () => {
-            await contract.buy(slogan, {value: ONE_ETHER});
+            await contract.buy(modelName, {value: ONE_ETHER});
 
             let tx = await contract.withdraw(defaultOverrideOptions);
 
@@ -190,10 +158,10 @@ async function commonEventCheck(tx, modelName, expectedPrice, expectedBuyer) {
 
         it('should throw when non-authorized user tries to withdraw', async () => {
             let _notOwnerWallet = new ethers.Wallet(notOwner.secretKey, provider);
-            let _contract = new ethers.Contract(contract.address, Billboard.abi, _notOwnerWallet);
+            let _contract = new ethers.Contract(contract.address, CryptoCars.abi, _notOwnerWallet);
             assert.revert(_contract.withdraw());
         });
 
     });
-*/
+
 });

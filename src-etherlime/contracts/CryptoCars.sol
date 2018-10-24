@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import '../../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract CryptoCars is Ownable {
 
@@ -13,6 +13,7 @@ contract CryptoCars is Ownable {
 
     mapping(string => CarDescription ) private modelNameToDescr;
     mapping(address => string[] ) public ownerToCars;
+    mapping(address => int ) public moneySpent;
 
     uint constant minInitialPrice = 1 ether;
 
@@ -30,7 +31,7 @@ contract CryptoCars is Ownable {
     function eraseForOldOwner(address oldOwner,
                               uint position) private
     {
-      require(ownerToCars[oldOwner].length > 0);
+      require(ownerToCars[oldOwner].length >= position);
 
       uint lengthArray = ownerToCars[oldOwner].length;
 
@@ -47,11 +48,21 @@ contract CryptoCars is Ownable {
         }
         else {
             // Re-sale
+            // As by problem description, the previous owner should receive back her investment,
+            // along with 50% of the overhead
+            uint moneyToReturnPreviousOwner = modelNameToDescr[modelName].price +
+            (msg.value - modelNameToDescr[modelName].price) / 2;
+
             require(msg.value >= modelNameToDescr[modelName].price * 3 / 2 , "The ether sent was too low for a re-sale");
             require(msg.sender != modelNameToDescr[modelName].owner , "Trying to re-sell a car to same user");
-            
+
+            address oldOwner = modelNameToDescr[modelName].owner;
             eraseForOldOwner(modelNameToDescr[modelName].owner,
                              modelNameToDescr[modelName].posOwnerArray);
+
+            // Give money back to old owner
+            oldOwner.transfer(moneyToReturnPreviousOwner);
+            moneySpent[oldOwner] -= int(moneyToReturnPreviousOwner);
         }
 
         modelNameToDescr[modelName].price = msg.value;
@@ -60,11 +71,9 @@ contract CryptoCars is Ownable {
         ownerToCars[msg.sender].push(modelName);
         modelNameToDescr[modelName].posOwnerArray = ownerToCars[msg.sender].length -1;
 
+        // Mark the expense for the new owner
+        moneySpent[msg.sender] += int(msg.value);
         emit CarBought(msg.sender, msg.value, modelName);
-    }
-
-    function carsByOwner(address owner) public view returns (uint) {
-        return ownerToCars[owner].length;
     }
 
     function carInfo(string modelName) public view returns(address ownerAddress, uint256 price)
@@ -80,6 +89,10 @@ contract CryptoCars is Ownable {
         owner.transfer(address(this).balance);
 
         emit LogWithdrawal(balance, now);
+    }
+
+    function getCarsCountOfOwner(address owner) public view returns(uint256) {
+      return ownerToCars[owner].length;
     }
 
 }
