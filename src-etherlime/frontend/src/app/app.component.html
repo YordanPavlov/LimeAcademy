@@ -21,7 +21,6 @@
   <div class="row" *ngIf="listCarsString">
     <div class="col-12 text-center align-self-center billboard">{{listCarsString}}</div>
   </div>
-<br>
 
   <br>
 
@@ -31,13 +30,18 @@
         <div class=" card-body ">
           <h5 class="card-title ">Check how much money have been spent by an address</h5>
           <div>
-            <input type="text" [(ngModel)]="address" placeholder="0x...">
-            <button class="btn btn-info" (click)="moneySpent()">Check</button>
+            <input type="text" #addressHash placeholder="0x...">
+            <button class="btn btn-info" (click)="moneySpentByAddress(addressHash.value)">Check</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="row" *ngIf="moneySpent">
+    <div class="col-12 text-center align-self-center billboard">{{moneySpent}}</div>
+  </div>
+
+<br>
 
   <div class="row">
     <div class="col no-gutters">
@@ -45,11 +49,14 @@
         <div class=" card-body ">
           <h5 class="card-title ">Check car owner and amount paid</h5>
           <div>
-            <input type="text" [(ngModel)]="address" placeholder="0x...">
-            <button class="btn btn-info" (click)="moneySpent()">Check</button>
+            <input type="text" #modelName placeholder="0x...">
+            <button class="btn btn-info" (click)="carInfo(modelName.value)">Check</button>
           </div>
         </div>
       </div>
     </div>
+  </div>
+  <div class="row" *ngIf="carInfoString">
+    <div class="col-12 text-center align-self-center billboard">{{carInfoString}}</div>
   </div>
 </div>

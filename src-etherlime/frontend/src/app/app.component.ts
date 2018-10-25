@@ -14,6 +14,8 @@ export class AppComponent {
   public currentBlock: number;
   public listCars: Array<string> = [];
   public listCarsString: string = null;
+  public moneySpent: number;
+  public carInfoString: string = null;
   public infuraApiKey = 'a082b43a140345eebfb45c70061838c1';
   public infuraProvider: ethers.providers.InfuraProvider;
   public contractAddress = '0x3c724305Cbd0227aDED6D4055B966c5AbA1BBD66'
@@ -41,8 +43,7 @@ export class AppComponent {
       console.log("Car " + count + " resolved as: " + currentCar)
       this.listCars.push( currentCar );
       if(this.listCarsString) {
-        this.listCarsString.concat(", ")
-        this.listCarsString.concat(currentCar)
+        this.listCarsString = this.listCarsString + ", " + currentCar;
       }
       else {
           this.listCarsString = currentCar;
@@ -50,13 +51,20 @@ export class AppComponent {
     }
   }
 
-  public async getTransactionHash(transactionHash) {
+  /*public async getTransactionHash(transactionHash) {
     const transaction = await this.infuraProvider.getTransactionReceipt(transactionHash);
     console.log(transaction);
+  }*/
+
+  public async moneySpentByAddress(address) {
+    this.moneySpent = await this.deployedContract.moneySpent(address);
+    console.log(this.moneySpent.toNumber());
   }
 
-  public async moneySpent() {
-    const moneySpent = await this.deployedContract.moneySpent(this.address);
-    console.log(moneySpent.toNumber());
+  public async carInfo(modelName) {
+    let carInfo = await this.deployedContract.carInfo(modelName);
+
+    this.carInfoString = "The car is owned by " + carInfo.ownerAddress +
+    " who paid " + carInfo.price.toNumber().toString() + " wei";
   }
 }
