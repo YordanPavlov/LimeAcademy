@@ -49,7 +49,7 @@
         <div class=" card-body ">
           <h5 class="card-title ">Check car owner and amount paid</h5>
           <div>
-            <input type="text" #modelName placeholder="0x...">
+            <input type="text" #modelName placeholder="model name">
             <button class="btn btn-info" (click)="carInfo(modelName.value)">Check</button>
           </div>
         </div>
@@ -59,4 +59,41 @@
   <div class="row" *ngIf="carInfoString">
     <div class="col-12 text-center align-self-center billboard">{{carInfoString}}</div>
   </div>
+
+<br>
+
+  <div class="row">
+    <div class="col no-gutters">
+      <div class="card">
+        <div class=" card-body ">
+          <h5 class="card-title ">Buy a car</h5>
+          <div>
+            <input type="text" #modelName placeholder="model name">
+            <input type="number" step="0.0000001" #priceETH placeholder="price in ether">
+            <button class="btn btn-info" (click)="buyCar(modelName.value, +priceETH.value)">Buy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<br>
+
+  <div class="row">
+    <div class="col no-gutters">
+      <div class="card">
+        <div class=" card-body ">
+          <h5 class="card-title ">Unlock wallet</h5>
+          <div>
+            <input type="text" [(ngModel)]="walletPrivateKey" placeholder="private key">
+            <button class="btn btn-info" (click)="connectWallet()">Connect wallet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="walletConnectedString">
+    <div class="col-12 text-center align-self-center billboard">{{walletConnectedString}}</div>
+  </div>
+
 </div>
