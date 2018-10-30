@@ -15,6 +15,7 @@ export class AppComponent {
   public currentBlock: number;
   public listCars: Array<string> = [];
   public listCarsString: string = null;
+  public carBoughtString: string = null;
   public moneySpent: number;
   public carInfoString: string = null;
   public walletPrivateKey: string = null;
@@ -34,6 +35,17 @@ export class AppComponent {
       this.currentBlock = blockNumber;
     });
     this.deployedContract = new ethers.Contract(this.contractAddress, CryptoCars.abi, this.infuraProvider);
+
+    this.deployedContract.on("CarBought", (buyer, paid, model) => {
+      // TODO add this check as filter to the event
+      if(this.wallet && this.wallet.address == buyer) {
+          this.carBoughtString = "Buyer " + buyer + " bought " + model + " for " + paid;
+          console.log(this.carBoughtString);
+      }
+
+
+    });
+
   }
 
   public async getCurrentBlock() {
